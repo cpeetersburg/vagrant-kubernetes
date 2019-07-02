@@ -1,0 +1,26 @@
+---
+# setup/worker.yml
+#
+# Author: Christopher Peeters <cp@linux.com>
+# Date: 2019-06-21
+# Ansible version: 2.7.10
+#
+# This is the playbook containing the worker node specific tasks
+- hosts: all
+  tasks:
+  - name: Copy the join command to the worker node
+    copy:
+      src: join-command
+      dest: /tmp/join-command.sh
+      mode: 0777
+
+  - name: Load the join command
+    command: cat /tmp/join-command.sh
+    register: join_command
+
+#  - debug:
+#      var: join_command
+
+  - name: Execute join command to add the node to the cluster
+    command: "{{ join_command.stdout }}"
+    become: yes

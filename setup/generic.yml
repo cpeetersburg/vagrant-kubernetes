@@ -1,0 +1,92 @@
+---
+# setup/generic.yml
+#
+# Author: Christopher Peeters <cp@linux.com>
+# Date: 2019-06-21
+# Ansible version: 2.7.10
+#
+# This is the playbook containing the generic tasks that should run on all hosts
+- hosts: all
+  tasks:
+  # This task disables swap for Kubernetes node (see https://github.com/kubernetes/kubernetes/pull/31996)
+  - name: Remove swapfile from /etc/fstab
+    mount:
+      name: swap
+      fstype: swap
+      state: absent
+    become: yes
+
+  - name: Disable swap
+    command: swapoff -a
+    become: yes
+
+  - name: Configure SELinux in permissive mode
+    selinux:
+      policy: targeted
+      state: permissive
+    become: yes
+
+  - name: Install Docker repository
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d/docker-ce.repo
+      owner: root
+      group: root
+      mode: 0644
+    become: yes
+  
+  - name: Load kernel modules required for containerd support
+    modprobe:
+      name: "{{ item }}"
+      state: present
+    loop:
+        - br_netfilter
+    become: yes
+
+  - name: Configure systcl params
+    sysctl:
+      name: "{{ item }}"
+      value: 1
+      state: present
+    loop:
+      - net.bridge.bridge-nf-call-iptables
+    become: yes
+  
+  - name: Install docker
+    package:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - docker-ce
+    become: yes
+
+  - name: Start and enable docker
+    service:
+      name: docker
+      state: started
+      enabled: yes
+    become: yes
+
+  - name: Install Kubernetes repository
+    yum_repository:
+      name: Kubernetes
+      description: Kubernetes repository for EL 7
+      baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled: yes
+      gpgcheck: yes
+      repo_gpgcheck: yes
+      gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    become: yes
+  
+  - name: Install kubeadm
+    package:
+      name: kubeadm
+      state: present
+      update_cache: yes
+    become: yes
+
+  - name: Start and enable kubelet
+    service:
+      name: kubelet
+      enabled: yes
+    become: yes

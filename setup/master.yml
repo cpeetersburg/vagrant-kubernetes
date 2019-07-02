@@ -1,0 +1,70 @@
+---
+# setup/master.yml
+#
+# Author: Christopher Peeters <cp@linux.com>
+# Date: 2019-06-21
+# Ansible version: 2.7.10
+#
+# This is the playbook containing the master node specific tasks
+- hosts: all
+  vars:
+    debug: false
+  tasks:
+    # This is not idempotent yet
+    # This needs dynamic variables
+  - name: Initialize Kubernetes Master
+    command: kubeadm init  --pod-network-cidr={{ k8s_network_cidr }} --apiserver-advertise-address=10.244.0.2 --apiserver-cert-extra-sans="10.244.0.2"  --node-name gru --ignore-preflight-errors=NumCPU
+    become: yes
+
+  - name: Create configdir for kubectl
+    file:
+      path: /home/vagrant/.kube
+      state: directory
+      owner: vagrant
+      group: vagrant
+
+  - name: Copy kubectl config
+    copy:
+      remote_src: yes
+      src: /etc/kubernetes/admin.conf
+      dest: /home/vagrant/.kube/config
+      owner: vagrant
+      group: vagrant
+    become: yes
+
+  - name: Generate join command
+    command: kubeadm token create --print-join-command
+    register: join_command
+
+  - debug:
+      var: join_command.stdout_lines[0]
+    when: debug
+
+  - name: Write join command to local file
+    local_action:
+      module: copy
+      content: "{{ join_command.stdout_lines[0] }}"
+      dest: "./join-command"
+
+# --- KUBERNETES NETWORK PLUGINS ---
+# This section will install a network add-on in Kubernetes.
+# Depending on your use case you might want to select another network add-on
+# for your setup. This can be achieved with the k8s_network_plugin that is
+# configured in the Vagrantfile.
+#
+# Calico
+  - name: Install Flannel network add-on
+    shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+    when: k8s_network_addon == "flannel"
+# Calico
+  - name: Install Calico network add-on
+    shell: kubectl apply -f https://docs.projectcalico.org/v3.7/manifests/calico.yaml
+    when: k8s_network_addon == "calico"
+# Canal
+  - name: Install Canal network add-on
+    shell: kubectl apply -f https://docs.projectcalico.org/v3.7/manifests/canal.yaml
+    when: k8s_network_addon == "canal"
+# Weave Net
+  - name: Install Weave Net network add-on
+    shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+    when: k8s_network_addon == "weave"
