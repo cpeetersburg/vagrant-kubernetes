@@ -9,12 +9,11 @@ Ansible is used to do the provisioning.
 
 ## Virtual Machine configuration
 You can change the hostnames, cpu and memory assigments and the IDs of each vm
-by changing the parameters in the HOSTS variable. Please be aware that kubeadm
-requires each machine to have at least 2 CPUs
+by changing the parameters in the `HOSTS` variable.
 
-You can also change the vagrant base box by configuring the IMAGE variable.
-Be aware that only centos/7 is supported for this Vagrantfile. All
-modifications of the IMAGE variable are at own risk!
+You can also change the vagrant base box by configuring the `IMAGE` variable.
+Be aware that only `centos/7` is supported for this Vagrantfile. All
+modifications of the `IMAGE` variable are at own risk!
 
 ## Kubernetes configuration
 You can select which network add-on you'd like to use by changing the
