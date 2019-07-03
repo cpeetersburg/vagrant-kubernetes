@@ -74,11 +74,11 @@ ENV["VAGRANT_NO_PARALLEL"] = "yes"
 
 # Select a Kubernetes network add-on for your installation
 # You can choose between:
-# - flannel
+# - flannel (work in progress)
 # - calico (work in progress)
 # - canal (work in progress)
-# - weave (work in progress)
-K8S_NETWORK = "flannel"
+# - weave
+K8S_NETWORK = "weave"
 
 Vagrant.configure("2") do |config|
   config.vm.box = IMAGE
@@ -128,6 +128,7 @@ Vagrant.configure("2") do |config|
         node.vm.network :private_network,
           ip: "192.168.51.#{host[:id]}",
           netmask: "255.255.255.0"
+        K8S_CIDR = "192.168.51.0/24"
       end
 
       node.vm.hostname = host[:name]
@@ -153,6 +154,12 @@ Vagrant.configure("2") do |config|
       if host[:role] == "master" then
         node.vm.provision "ansible" do |ansible|
           ansible.playbook = "setup/master.yml"
+          ansible.extra_vars = { k8s_network_addon: K8S_NETWORK, k8s_network_cidr: K8S_CIDR }
+        end
+      end
+      if host[:role] == "worker" then
+        node.vm.provision "ansible" do |ansible|
+          ansible.playbook = "setup/worker.yml"
           ansible.extra_vars = { k8s_network_addon: K8S_NETWORK, k8s_network_cidr: K8S_CIDR }
         end
       end

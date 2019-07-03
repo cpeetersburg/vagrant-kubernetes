@@ -13,7 +13,8 @@
     # This is not idempotent yet
     # This needs dynamic variables
   - name: Initialize Kubernetes Master
-    command: kubeadm init  --pod-network-cidr={{ k8s_network_cidr }} --apiserver-advertise-address=10.244.0.2 --apiserver-cert-extra-sans="10.244.0.2"  --node-name gru --ignore-preflight-errors=NumCPU
+    #command: kubeadm init  --pod-network-cidr={{ k8s_network_cidr }} --apiserver-advertise-address=10.244.0.2 --apiserver-cert-extra-sans="10.244.0.2"  --node-name gru --ignore-preflight-errors=NumCPU
+    command: kubeadm init  --pod-network-cidr={{ k8s_network_cidr }} --apiserver-advertise-address=192.168.51.2 --apiserver-cert-extra-sans="192.168.51.2"  --node-name gru --ignore-preflight-errors=NumCPU
     become: yes
 
   - name: Create configdir for kubectl
