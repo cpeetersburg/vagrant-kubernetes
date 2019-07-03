@@ -19,7 +19,7 @@ modifications of the IMAGE variable are at own risk!
 ## Kubernetes configuration
 You can select which network add-on you'd like to use by changing the
 `K8S_NETWORK` variable. A list of possible values is provided. Currently only
-flannel has been tested.
+`weave` has been tested.
 
 ## Vagrant providers
 This Vagrantfile is built for vagrant-libvirt. It should work on VirtualBox
