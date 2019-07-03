@@ -23,7 +23,7 @@
 #
 # Kubernetes configuration
 # ------------------------
-# You can select which network add-on you"d like to use by changing the
+# You can select which network add-on you'd like to use by changing the
 # K8S_NETWORK variable. A list of possible values is provided.
 #
 # Vagrant providers
@@ -34,7 +34,7 @@
 # Issues
 # ------
 # Please log issues by creating an issue on Github. Please be aware that I
-# can"t support all platforms and vagrant providers so feel free to provide a
+# can't support all platforms and vagrant providers so feel free to provide a
 # solution yourself.
 #
 # Licencing
